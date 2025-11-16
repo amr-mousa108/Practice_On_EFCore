@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Practice_On_EFCore.Data;
 
@@ -10,9 +11,11 @@ using Practice_On_EFCore.Data;
 namespace Practice_On_EFCore.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251115221154_add class course")]
+    partial class addclasscourse
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -67,8 +70,7 @@ namespace Practice_On_EFCore.Migrations
                 {
                     b.HasOne("Practice_On_EFCore.Models.Student", "Student")
                         .WithMany("Courses")
-                        .HasForeignKey("StdId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("StdId");
 
                     b.Navigation("Student");
                 });

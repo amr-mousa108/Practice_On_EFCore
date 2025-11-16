@@ -11,6 +11,7 @@ namespace Practice_On_EFCore.Data
     internal class AppDbContext : DbContext
     {
         public DbSet<Student> Students { get; set; }
+        public DbSet<Course> Courses { get; set; }
         public AppDbContext(DbContextOptions options) : base(options)
         {
         }
@@ -26,6 +27,13 @@ namespace Practice_On_EFCore.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+         
+            modelBuilder.Entity<Course>()
+                .HasOne(c => c.Student)
+                .WithMany(s => s.Courses)
+                .HasForeignKey(c => c.StdId)
+                .OnDelete(DeleteBehavior.Cascade);
+       
             base.OnModelCreating(modelBuilder);
         }
     }
