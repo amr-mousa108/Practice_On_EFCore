@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Practice_On_EFCore.Data;
 using Practice_On_EFCore.Models;
+using System.Threading.Channels;
 
 namespace Practice_On_EFCore
 {
@@ -124,6 +126,93 @@ namespace Practice_On_EFCore
                 }
 
             }
+        }
+
+        //CRUD Operations 
+
+        public void SearchByName(AppDbContext context)
+        {
+            Console.Write("Enter Student Name To Search about");
+            var name = Console.ReadLine() ?? "";
+
+            var std = context.Students.Where(s => s.Name.Contains(name))
+                .Include(s => s.StudentCourses)
+                .ThenInclude(c => c.Course)
+                .ToList();
+
+            foreach (var s in std)
+            {
+              var courses =string.Join("," , s.StudentCourses.Select(s => s.Course!.Title));
+                Console.WriteLine($"{s.Id} | {s.Name} | {courses}");
+
+            }
+        }
+        public void AddStudent(AppDbContext context)
+        {
+            Console.Write("Name"); var name = Console.ReadLine() ?? "";
+            Console.Write("Age"); var age = int.Parse(Console.ReadLine() ?? "0");
+            Console.Write("DepartmentId"); var deptId = int.Parse(Console.ReadLine() ?? "0");
+
+            var newStd=new Student { Age = age,Name = name,DepartmentId = deptId };
+            context.Students.Add(newStd);
+            context.SaveChanges();
+            Console.WriteLine("Added");
+
+
+        }
+
+        public void UpdateStudent(AppDbContext context)
+        {
+            Console.Write("Enter Student Id to Update: "); var id = int.Parse(Console.ReadLine() ?? "0");
+            var std = context.Students.Find(id);
+            if (std == null) { Console.WriteLine("Not found"); return; }
+
+            Console.Write("New Name (leave empty to keep)");
+            var name = Console.ReadLine();
+            if (!string.IsNullOrEmpty(name)) std.Name = name;
+
+            Console.Write("New Age (leave empty to keep)");
+            var age = Console.ReadLine();
+            if (!string.IsNullOrEmpty(age)) std.Age = int.Parse(age); 
+            
+            Console.Write("New DepartmentId (leave empty to keep)");
+            var DeptId = Console.ReadLine();
+            if (!string.IsNullOrEmpty(DeptId)) std.DepartmentId = int.Parse(DeptId);
+
+            context.SaveChanges();
+            Console.WriteLine("Updated");
+
+
+
+
+        }
+
+        public void DeleteStudent(AppDbContext context)
+        {
+            Console.Write("Enter Id: "); var id =int.Parse(Console.ReadLine() ?? "0");
+            var std = context.Students.Include(s => s.StudentCourses)
+                .FirstOrDefault(s => s.Id ==id);
+            if( std == null) { Console.WriteLine("Not Fount"); return; }
+
+            if(std.StudentCourses.Any() )
+            {
+                context.StudentCourses.RemoveRange(std.StudentCourses);
+            }
+            context.Students.Remove(std);
+            context.SaveChanges();
+            Console.WriteLine("Deleted");
+
+        }
+        public void AssignCourseToStudent(AppDbContext context)
+        {
+            Console.Write("Enter Student Id"); var S_id = int.Parse(Console.ReadLine() ?? "0");
+            Console.Write("Enter Course Id");  var C_id = int.Parse(Console.ReadLine() ?? "0");
+
+            var exists = context.StudentCourses.Find(S_id ,C_id);
+            if(exists != null) { Console.WriteLine("Already Assigned"); return; }
+            context.StudentCourses.Add(new StudentCourse { StudentId = S_id, CourseId = C_id });
+            context.SaveChanges();
+            Console.WriteLine("Assigned");
         }
     }
 }
