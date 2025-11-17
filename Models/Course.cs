@@ -14,6 +14,12 @@ namespace Practice_On_EFCore.Models
         public int? StdId { get; set; }
         [ForeignKey("StdId")]
         public Student? Student { get; set; }
+
+        public int DepartmentId { get; set; }
+        public Department? Department { get; set; }
+
+        public ICollection<StudentCourse> CoursesStudents { get; set; } = new HashSet<StudentCourse>();
+
     }
 
 }
